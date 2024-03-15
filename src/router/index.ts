@@ -286,6 +286,29 @@ export const dynamicRoutes: RouteRecordRaw[] = [
         }
       }
     ]
+  },
+  {
+    path: "/stableDiffusion",
+    component: Layouts,
+    redirect: "/stableDiffusion/txt2img",
+    name: "StableDiffusion",
+    meta: {
+      title: "SD绘画",
+      svgIcon: "lock",
+      roles: ["admin", "editor"], // 可以在根路由中设置角色
+      alwaysShow: true // 将始终显示根菜单
+    },
+    children: [
+      {
+        path: "txt2img",
+        component: () => import("@/views/stableDiffusion/txt2img/index.vue"),
+        name: "Txt2ImgPermission",
+        meta: {
+          title: "文生图",
+          roles: ["admin"] // 或者在子导航中设置角色
+        }
+      }
+    ]
   }
 ]
 
