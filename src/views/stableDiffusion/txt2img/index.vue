@@ -42,6 +42,7 @@ const generaterPromptStr = () => {
   const qualityList = promptObj.quality
   const adjectiveList = promptObj.adjective
   const objectList = promptObj.object
+  const cameraList = promptObj.camera
   const promptList = [
     styleList[Math.floor(Math.random() * styleList.length)],
     qualityList[Math.floor(Math.random() * qualityList.length)]
@@ -53,6 +54,7 @@ const generaterPromptStr = () => {
       objectList[Math.floor(Math.random() * objectList.length)]
     promptList.push(adjectiveObject)
   }
+  promptList.push(cameraList[Math.floor(Math.random() * cameraList.length)])
   promptStr.value = promptList.join(",")
   translatePrompt()
   return promptStr
@@ -84,17 +86,19 @@ const imgSrc = ref("")
 const imgList = ref([])
 const loading = ref(false)
 setXApiKey("09302f179980dcd263ae8d8e98d471a35a953485175d06a800a359b6672db2b4")
-const getTxt2Img = () => {
+const getTxt2Img = async () => {
   // getTxt2ImgDataApi(txt2ImgParams).then((res0) => {
   //   console.log(res0)
   // })
-  loading.value = true
-  getTxt2ImgDataRemoteApi(txt2ImgParams).then((res) => {
+  try {
+    loading.value = true
+    const res = await getTxt2ImgDataRemoteApi(txt2ImgParams)
     imgList.value = res.output
     imgSrc.value = res.output[0]
     console.log(res)
+  } finally {
     loading.value = false
-  })
+  }
   // imgSrc.value = "https://img.midjourneyapi.xyz/sd/066ed402-b5c5-44e9-8e76-fe209109db5a.png"
   // imgList.value = ["https://img.midjourneyapi.xyz/sd/066ed402-b5c5-44e9-8e76-fe209109db5a.png"]
 }

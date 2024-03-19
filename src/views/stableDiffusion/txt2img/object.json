@@ -346,5 +346,16 @@
     "Psychic abilities",
     "Cosmic anomalies",
     "Time dilation fields"
+  ],
+  "camera": [
+    "Aperture",
+    "depth of field",
+    "warm and cool tones",
+    "shutter speed",
+    "wide angle",
+    "macro",
+    "telephoto",
+    "axis shifting",
+    "fisheye lens"
   ]
 }
