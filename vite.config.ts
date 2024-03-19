@@ -34,6 +34,13 @@ export default (configEnv: ConfigEnv): UserConfigExport => {
       strictPort: false,
       /** 接口代理 */
       proxy: {
+        "/baidu": {
+          target: "https://fanyi-api.baidu.com/",
+          ws: true,
+          /** 是否允许跨域 */
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/baidu/, "")
+        },
         "/api/v1/remote": {
           target: "https://api.midjourneyapi.xyz",
           ws: true,

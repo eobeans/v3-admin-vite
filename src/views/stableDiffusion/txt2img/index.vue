@@ -5,6 +5,36 @@ import { getTxt2ImgDataRemoteApi } from "@/api/stable-diffusion"
 import { type Txt2ImgRequestData } from "@/api/stable-diffusion/types/txt2img"
 import { setXApiKey } from "@/utils/cache/cookies"
 import promptObj from "./object.json"
+import CryptoJS from "crypto-js"
+import axios from "axios"
+
+// 百度翻译
+const promptStrZh = ref()
+const translatePrompt = () => {
+  const appid = "20240319001998640"
+  const salt = "1024256"
+  const key = "dr2tzlKTZ0nJVKx94irK"
+  const str1 = appid + promptStr.value + salt + key
+  const sign = CryptoJS.MD5(str1).toString()
+  axios
+    .get("baidu/api/trans/vip/translate", {
+      params: {
+        q: promptStr.value,
+        from: "en",
+        to: "zh",
+        appid: appid,
+        salt: salt,
+        sign: sign
+      }
+    })
+    .then(function (res: any) {
+      console.log(res)
+      promptStrZh.value = res.data.trans_result[0].dst
+    })
+    .catch(function (error) {
+      console.log(error)
+    })
+}
 
 const promptStr = ref()
 const generaterPromptStr = () => {
@@ -19,10 +49,12 @@ const generaterPromptStr = () => {
   for (let i = 0; i < 6; i++) {
     const adjectiveObject =
       adjectiveList[Math.floor(Math.random() * adjectiveList.length)] +
+      " " +
       objectList[Math.floor(Math.random() * objectList.length)]
     promptList.push(adjectiveObject)
   }
   promptStr.value = promptList.join(",")
+  translatePrompt()
   return promptStr
 }
 generaterPromptStr()
@@ -97,6 +129,8 @@ const getTxt2Img = () => {
       <div style="width: 500px; margin-right: 40px">
         <div class="mg-20">提示词：</div>
         <div class="mg-20">{{ promptStr }}</div>
+        <div class="mg-20">提示词（中文翻译）：</div>
+        <div class="mg-20">{{ promptStrZh }}</div>
         <div class="mg-20">反向提示词：</div>
         <div class="mg-20">{{ negativePromptStr }}</div>
         <div class="mg-20">
