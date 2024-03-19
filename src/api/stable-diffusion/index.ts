@@ -9,3 +9,12 @@ export function getTxt2ImgDataApi(data: Txt2ImgType.Txt2ImgRequestData) {
     data: data
   })
 }
+
+/** 获取文生图接口 */
+export function getTxt2ImgDataRemoteApi(data: Txt2ImgType.Txt2ImgRequestData) {
+  return request<Txt2ImgType.Txt2ImgRemoteResponseData>({
+    url: "remote/sd/txt2img",
+    method: "post",
+    data: data
+  })
+}

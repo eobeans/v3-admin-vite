@@ -3,7 +3,7 @@ import store from "@/store"
 import { defineStore } from "pinia"
 import { useTagsViewStore } from "./tags-view"
 import { useSettingsStore } from "./settings"
-import { getToken, removeToken, setToken } from "@/utils/cache/cookies"
+import { getToken, removeToken, setToken, removeXApiKey } from "@/utils/cache/cookies"
 import { resetRouter } from "@/router"
 import { loginApi, getUserInfoApi } from "@/api/login"
 import { type LoginRequestData } from "@/api/login/types/login"
@@ -41,6 +41,7 @@ export const useUserStore = defineStore("user", () => {
   /** 登出 */
   const logout = () => {
     removeToken()
+    removeXApiKey()
     token.value = ""
     roles.value = []
     resetRouter()
