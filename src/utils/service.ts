@@ -113,7 +113,7 @@ function createRequest(service: AxiosInstance) {
         "X-API-KEY": xApiKey,
         "Content-Type": "application/json"
       },
-      timeout: 30000,
+      timeout: 300000, // 5000
       baseURL: import.meta.env.VITE_BASE_API,
       data: {}
     }

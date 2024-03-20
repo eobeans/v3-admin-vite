@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import { ref, reactive } from "vue"
-// import { getTxt2ImgDataApi, getTxt2ImgDataRemoteApi } from "@/api/stable-diffusion"
-import { getTxt2ImgDataRemoteApi } from "@/api/stable-diffusion"
+import { getTxt2ImgDataApi, getTxt2ImgDataRemoteApi } from "@/api/stable-diffusion"
 import { type Txt2ImgRequestData } from "@/api/stable-diffusion/types/txt2img"
 import { setXApiKey } from "@/utils/cache/cookies"
 import promptObj from "./object.json"
@@ -71,7 +70,8 @@ const generaterNegativePrompt = () => {
 generaterNegativePrompt()
 
 /** 文生图请求参数 */
-const txt2ImgParams: Txt2ImgRequestData = reactive({
+
+const txt2ImgRemoteParams: Txt2ImgRequestData = reactive({
   width: "512",
   height: "768",
   steps: 32,
@@ -82,20 +82,34 @@ const txt2ImgParams: Txt2ImgRequestData = reactive({
   model_id: "midjourney"
 })
 
+const txt2ImgParams: Txt2ImgRequestData = reactive({
+  width: "512",
+  height: "768",
+  steps: 32,
+  batch_size: 1,
+  sampler_index: "Euler",
+  prompt: promptStr,
+  negative_prompt: negativePromptStr
+})
+
+const remoteType = ref("1")
 const imgSrc = ref("")
 const imgList = ref([])
 const loading = ref(false)
-setXApiKey("09302f179980dcd263ae8d8e98d471a35a953485175d06a800a359b6672db2b4")
+const xApiKey = ref("b68ce212fa3d6bcf0ecfd78c0c05d003052b185bf78bbbcde96062001e439476")
 const getTxt2Img = async () => {
-  // getTxt2ImgDataApi(txt2ImgParams).then((res0) => {
-  //   console.log(res0)
-  // })
   try {
     loading.value = true
-    const res = await getTxt2ImgDataRemoteApi(txt2ImgParams)
-    imgList.value = res.output
-    imgSrc.value = res.output[0]
-    console.log(res)
+    if (remoteType.value == "1") {
+      setXApiKey(xApiKey.value)
+      const res = await getTxt2ImgDataRemoteApi(txt2ImgRemoteParams)
+      imgList.value = res.output
+      imgSrc.value = res.output[0]
+      console.log(res)
+    } else if (remoteType.value == "2") {
+      const res2 = await getTxt2ImgDataApi(txt2ImgParams)
+      console.log(res2)
+    }
   } finally {
     loading.value = false
   }
@@ -126,17 +140,36 @@ const getTxt2Img = async () => {
 <template>
   <div v-loading="loading" class="app-container">
     <div>
+      <el-select v-model="remoteType" style="width: 180px; margin-right: 20px">
+        <el-option label="远程API" value="1" />
+        <el-option label="本地SD-API" value="2" />
+      </el-select>
       <el-button type="primary" @click="getTxt2Img">点击开始文生图</el-button>
       <el-button type="primary" @click="generaterPromptStr">生成正向提示词</el-button>
     </div>
     <div class="flex-row">
       <div style="width: 500px; margin-right: 40px">
+        <div class="mg-20">配置表单：</div>
+        <div class="mg-20">
+          <el-form>
+            <el-form-item label="x-api-key">
+              <el-input v-model="xApiKey" />
+            </el-form-item>
+            <el-form-item label="steps（步长）">
+              <el-input v-model="txt2ImgRemoteParams.steps" />
+            </el-form-item>
+          </el-form>
+        </div>
         <div class="mg-20">提示词：</div>
-        <div class="mg-20">{{ promptStr }}</div>
+        <div class="mg-20">
+          <el-input type="textarea" :rows="4" v-model="promptStr" />
+        </div>
         <div class="mg-20">提示词（中文翻译）：</div>
         <div class="mg-20">{{ promptStrZh }}</div>
         <div class="mg-20">反向提示词：</div>
-        <div class="mg-20">{{ negativePromptStr }}</div>
+        <div class="mg-20">
+          <el-input type="textarea" :rows="2" v-model="negativePromptStr" />
+        </div>
         <div class="mg-20">
           图片地址：
           <!-- <el-button v-if="imgSrc" class="mg-20" type="primary" @click="downloadImg">下载图片</el-button> -->
