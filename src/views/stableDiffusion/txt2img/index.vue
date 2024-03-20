@@ -44,16 +44,13 @@ const generaterPromptStr = () => {
   const cameraList = promptObj.camera
   const promptList = [
     styleList[Math.floor(Math.random() * styleList.length)],
-    qualityList[Math.floor(Math.random() * qualityList.length)]
+    qualityList[Math.floor(Math.random() * qualityList.length)],
+    adjectiveList[Math.floor(Math.random() * adjectiveList.length)],
+    cameraList[Math.floor(Math.random() * cameraList.length)]
   ]
   for (let i = 0; i < 6; i++) {
-    const adjectiveObject =
-      adjectiveList[Math.floor(Math.random() * adjectiveList.length)] +
-      " " +
-      objectList[Math.floor(Math.random() * objectList.length)]
-    promptList.push(adjectiveObject)
+    promptList.push(objectList[Math.floor(Math.random() * objectList.length)])
   }
-  promptList.push(cameraList[Math.floor(Math.random() * cameraList.length)])
   promptStr.value = promptList.join(",")
   translatePrompt()
   return promptStr
