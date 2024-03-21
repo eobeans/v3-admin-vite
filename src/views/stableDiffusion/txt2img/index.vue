@@ -1,11 +1,12 @@
 <script lang="ts" setup>
 import { ref, reactive } from "vue"
-import { getTxt2ImgDataApi, getTxt2ImgDataRemoteApi } from "@/api/stable-diffusion"
+import { getTxt2ImgDataApi } from "@/api/stable-diffusion"
 import { type Txt2ImgRequestData } from "@/api/stable-diffusion/types/txt2img"
 import { setXApiKey } from "@/utils/cache/cookies"
 import promptObj from "./object.json"
 import CryptoJS from "crypto-js"
 import axios from "axios"
+import { ElMessage } from "element-plus"
 
 // 百度翻译
 const promptStrZh = ref()
@@ -72,8 +73,6 @@ const txt2ImgRemoteParams: Txt2ImgRequestData = reactive({
   width: "512",
   height: "768",
   steps: 32,
-  // batch_size: 1,
-  // sampler_index: "Euler",
   prompt: promptStr,
   negative_prompt: negativePromptStr,
   model_id: "midjourney"
@@ -99,10 +98,18 @@ const getTxt2Img = async () => {
     loading.value = true
     if (remoteType.value == "1") {
       setXApiKey(xApiKey.value)
-      const res = await getTxt2ImgDataRemoteApi(txt2ImgRemoteParams)
-      imgList.value = res.output
-      imgSrc.value = res.output[0]
-      console.log(res)
+      const headers = {
+        "X-API-KEY": xApiKey.value
+      }
+      // const res = await getTxt2ImgDataRemoteApi(txt2ImgRemoteParams)
+      const res: any = await axios.post("https://api.midjourneyapi.xyz/sd/txt2img", txt2ImgRemoteParams, { headers })
+      if (res.status == 200) {
+        imgList.value = res.data.output
+        imgSrc.value = res.data.output[0]
+      } else {
+        ElMessage.error(res.statusText)
+      }
+      console.log("goapi.ai", res)
     } else if (remoteType.value == "2") {
       const res2 = await getTxt2ImgDataApi(txt2ImgParams)
       console.log(res2)
