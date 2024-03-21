@@ -2,6 +2,7 @@
 import { reactive, ref } from "vue"
 import { useRouter } from "vue-router"
 import { useUserStore } from "@/store/modules/user"
+import { useStableDiffusionStore } from "@/store/modules/stable-diffusion"
 import { type FormInstance, type FormRules } from "element-plus"
 import { User, Lock, Key, Picture, Loading } from "@element-plus/icons-vue"
 import { getLoginCodeApi } from "@/api/login"
@@ -43,7 +44,18 @@ const handleLogin = () => {
       useUserStore()
         .login(loginFormData)
         .then(() => {
-          router.push({ path: "/" })
+          useStableDiffusionStore()
+            .login()
+            .then(() => {
+              router.push({ path: "/" })
+            })
+            .catch(() => {
+              createCode()
+              loginFormData.password = ""
+            })
+            .finally(() => {
+              loading.value = false
+            })
         })
         .catch(() => {
           createCode()

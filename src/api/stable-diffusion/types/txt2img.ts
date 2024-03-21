@@ -5,6 +5,8 @@ export interface Txt2ImgRequestData {
   height: number | string
   // 步数
   steps?: number
+  // 批次
+  n_iter?: number
   // 数量/批
   batch_size?: number
   // 采样器

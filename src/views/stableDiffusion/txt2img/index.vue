@@ -1,13 +1,13 @@
 <script lang="ts" setup>
 import { ref, reactive } from "vue"
 // import { getTxt2ImgDataApi } from "@/api/stable-diffusion"
-import { type Txt2ImgRequestData, type SdLoginRequestData } from "@/api/stable-diffusion/types/txt2img"
+import { type Txt2ImgRequestData } from "@/api/stable-diffusion/types/txt2img"
 import { setXApiKey } from "@/utils/cache/cookies"
 import promptObj from "./object.json"
 import CryptoJS from "crypto-js"
 import axios from "axios"
 import { ElMessage } from "element-plus"
-import { setAccessToken } from "@/utils/cache/cookies"
+import { getAccessToken } from "@/utils/cache/cookies"
 
 const samplerOpts: any = reactive([
   { label: "Euler", value: "Euler" },
@@ -73,42 +73,18 @@ const generaterNegativePrompt = () => {
 }
 generaterNegativePrompt()
 
-// 登入SD
+// SD接口服务
 const localSdInstance = axios.create({
   baseURL: "/localSd",
   timeout: 100000,
   headers: {
+    Authorization: getAccessToken(),
+    Connection: "keep-alive",
     "Access-Control-Allow-Origin": "http://localhost:3333",
     "Access-Control-Allow-Methods": "GET, POST",
     "Access-Control-Allow-Headers": "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range"
   }
 })
-const sdToken = ref("")
-const sdLoginParams: SdLoginRequestData = reactive({
-  username: "eobeans",
-  password: "eobeans@1996"
-})
-const loginSD = async () => {
-  const formData = new FormData()
-  formData.append("username", sdLoginParams.username)
-  formData.append("password", sdLoginParams.password)
-  localSdInstance
-    .post("login", formData)
-    .then((res: any) => {
-      console.log("登入SD success", res)
-      localSdInstance.get("token").then((res1: any) => {
-        console.log("getToken", res1)
-        sdToken.value = res1.data.token
-        setAccessToken(res1.data.token)
-      })
-    })
-    .catch((err: any) => {
-      console.log("登入SD error", err)
-    })
-
-  // sdToken.value = res.data
-}
-loginSD()
 
 /** 文生图请求参数 */
 const txt2ImgRemoteParams: Txt2ImgRequestData = reactive({
@@ -124,6 +100,7 @@ const txt2ImgParams: Txt2ImgRequestData = reactive({
   width: "512",
   height: "768",
   steps: 32,
+  n_iter: 1,
   batch_size: 1,
   sampler_index: "Euler",
   prompt: promptStr,
@@ -155,8 +132,10 @@ const getTxt2Img = async () => {
     } else if (remoteType.value == "2") {
       const res2: any = await localSdInstance.post("sdapi/v1/txt2img", txt2ImgParams)
       if (res2.status == 200) {
-        imgList.value = res2.data.images
-        imgSrc.value = res2.data.images[0]
+        imgList.value = res2.data.images.map((item: string) => {
+          return `data:image/jpeg;base64,${item}`
+        })
+        imgSrc.value = `data:image/jpeg;base64,${res2.data.images[0]}`
       } else {
         ElMessage.error(res2.statusText)
       }
@@ -215,15 +194,21 @@ const getTxt2Img = async () => {
         <div v-if="remoteType == '2'" class="mg-20">
           <el-form label-width="140px" label-position="left">
             <el-form-item label="采样器">
-              <el-select v-model="txt2ImgParams.sampler_index" placeholder="请选择采样器">
+              <el-select v-model="txt2ImgParams.sampler_index" style="width: 220px" placeholder="请选择采样器">
                 <el-option v-for="item in samplerOpts" :key="item.value" :label="item.label" :value="item.value" />
               </el-select>
             </el-form-item>
             <el-form-item label="数量/批次">
-              <el-slider v-model="txt2ImgParams.batch_size" :min="1" :max="4" />
+              <div class="flex-row">
+                <div style="margin-right: 40px">{{ txt2ImgParams.batch_size }}</div>
+                <el-slider v-model="txt2ImgParams.batch_size" :min="1" :max="4" style="width: 220px" />
+              </div>
             </el-form-item>
             <el-form-item label="步长">
-              <el-slider v-model="txt2ImgParams.steps" :min="20" :max="50" />
+              <div class="flex-row">
+                <div style="margin-right: 40px">{{ txt2ImgParams.steps }}</div>
+                <el-slider v-model="txt2ImgParams.steps" :min="20" :max="50" style="width: 220px" />
+              </div>
             </el-form-item>
           </el-form>
         </div>
@@ -241,7 +226,7 @@ const getTxt2Img = async () => {
           图片地址：
           <!-- <el-button v-if="imgSrc" class="mg-20" type="primary" @click="downloadImg">下载图片</el-button> -->
         </div>
-        <div class="mg-20">
+        <div v-if="remoteType == '1'" class="mg-20">
           <div>{{ imgSrc }}</div>
         </div>
       </div>
