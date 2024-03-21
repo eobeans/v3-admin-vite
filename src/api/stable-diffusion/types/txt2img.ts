@@ -25,4 +25,9 @@ export interface Txt2ImgRemoteResponseData {
   status: string
 }
 
+export interface SdLoginRequestData {
+  username: string
+  password: string
+}
+
 export type Txt2ImgResponseData = ApiResponseData<string>

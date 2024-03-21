@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { ref, reactive } from "vue"
-import { getTxt2ImgDataApi } from "@/api/stable-diffusion"
-import { type Txt2ImgRequestData } from "@/api/stable-diffusion/types/txt2img"
+// import { getTxt2ImgDataApi } from "@/api/stable-diffusion"
+import { type Txt2ImgRequestData, type SdLoginRequestData } from "@/api/stable-diffusion/types/txt2img"
 import { setXApiKey } from "@/utils/cache/cookies"
 import promptObj from "./object.json"
 import CryptoJS from "crypto-js"
@@ -67,8 +67,20 @@ const generaterNegativePrompt = () => {
 }
 generaterNegativePrompt()
 
-/** 文生图请求参数 */
+// 登入SD
+const sdToken = ref("")
+const sdLoginParams: SdLoginRequestData = reactive({
+  username: "eobeans",
+  password: "eobeans@1996"
+})
+const loginSD = async () => {
+  const res: any = await axios.post("http://127.0.0.1:7860/login", sdLoginParams)
+  console.log(res)
+  sdToken.value = res.data
+}
+loginSD()
 
+/** 文生图请求参数 */
 const txt2ImgRemoteParams: Txt2ImgRequestData = reactive({
   width: "512",
   height: "768",
@@ -88,7 +100,7 @@ const txt2ImgParams: Txt2ImgRequestData = reactive({
   negative_prompt: negativePromptStr
 })
 
-const remoteType = ref("1")
+const remoteType = ref("2")
 const imgSrc = ref("")
 const imgList = ref([])
 const loading = ref(false)
@@ -111,8 +123,15 @@ const getTxt2Img = async () => {
       }
       console.log("goapi.ai", res)
     } else if (remoteType.value == "2") {
-      const res2 = await getTxt2ImgDataApi(txt2ImgParams)
-      console.log(res2)
+      // const res2 = await getTxt2ImgDataApi(txt2ImgParams)
+      // console.log(res2)
+      const res2: any = await axios.post("http://127.0.0.1:7860/sdapi/v1/txt2img", txt2ImgParams)
+      if (res2.status == 200) {
+        imgList.value = res2.data.output
+        imgSrc.value = res2.data.output[0]
+      } else {
+        ElMessage.error(res2.statusText)
+      }
     }
   } finally {
     loading.value = false
