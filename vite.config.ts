@@ -41,19 +41,19 @@ export default ({ mode }: ConfigEnv): UserConfigExport => {
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/baidu/, "")
         },
+        "/localSd": {
+          target: "http://127.0.0.1:7860",
+          ws: true,
+          /** 是否允许跨域 */
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/localSd/, "")
+        },
         "/api/v1/remote": {
           target: "https://api.midjourneyapi.xyz",
           ws: true,
           /** 是否允许跨域 */
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/api\/v1\/remote/, "")
-        },
-        "/api/v1/sd": {
-          target: "http://127.0.0.1:7860",
-          ws: true,
-          /** 是否允许跨域 */
-          changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/api\/v1\/sd/, "")
         },
         "/api/v1": {
           target: "https://mock.mengxuegu.com/mock/63218b5fb4c53348ed2bc212",

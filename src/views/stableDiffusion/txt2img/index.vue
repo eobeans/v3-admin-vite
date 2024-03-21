@@ -7,6 +7,7 @@ import promptObj from "./object.json"
 import CryptoJS from "crypto-js"
 import axios from "axios"
 import { ElMessage } from "element-plus"
+import { setAccessToken } from "@/utils/cache/cookies"
 
 // 百度翻译
 const promptStrZh = ref()
@@ -68,15 +69,39 @@ const generaterNegativePrompt = () => {
 generaterNegativePrompt()
 
 // 登入SD
+const localSdInstance = axios.create({
+  baseURL: "/localSd",
+  timeout: 100000,
+  headers: {
+    "Access-Control-Allow-Origin": "http://localhost:3333",
+    "Access-Control-Allow-Methods": "GET, POST",
+    "Access-Control-Allow-Headers": "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range"
+  }
+})
 const sdToken = ref("")
 const sdLoginParams: SdLoginRequestData = reactive({
   username: "eobeans",
   password: "eobeans@1996"
 })
 const loginSD = async () => {
-  const res: any = await axios.post("http://127.0.0.1:7860/login", sdLoginParams)
-  console.log(res)
-  sdToken.value = res.data
+  const formData = new FormData()
+  formData.append("username", sdLoginParams.username)
+  formData.append("password", sdLoginParams.password)
+  localSdInstance
+    .post("login", formData)
+    .then((res: any) => {
+      console.log("登入SD success", res)
+      localSdInstance.get("token").then((res1: any) => {
+        console.log("getToken", res1)
+        sdToken.value = res1.data.token
+        setAccessToken(res1.data.token)
+      })
+    })
+    .catch((err: any) => {
+      console.log("登入SD error", err)
+    })
+
+  // sdToken.value = res.data
 }
 loginSD()
 
@@ -169,6 +194,7 @@ const getTxt2Img = async () => {
       </el-select>
       <el-button type="primary" @click="getTxt2Img">点击开始文生图</el-button>
       <el-button type="primary" @click="generaterPromptStr">生成正向提示词</el-button>
+      <!-- <el-button type="primary" @click="loginSD">测试登入SD</el-button> -->
     </div>
     <div class="flex-row">
       <div style="width: 500px; margin-right: 40px">
