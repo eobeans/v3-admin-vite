@@ -133,7 +133,9 @@ const getTxt2Img = async () => {
       const res2: any = await localSdInstance.post("sdapi/v1/txt2img", txt2ImgParams)
       if (res2.status == 200) {
         imgList.value = res2.data.images.map((item: string) => {
-          return `data:image/jpeg;base64,${item}`
+          const base64 = `data:image/jpeg;base64,${item}`
+          downloadImg(base64)
+          return base64
         })
         imgSrc.value = `data:image/jpeg;base64,${res2.data.images[0]}`
       } else {
@@ -145,6 +147,16 @@ const getTxt2Img = async () => {
   }
   // imgSrc.value = "https://img.midjourneyapi.xyz/sd/066ed402-b5c5-44e9-8e76-fe209109db5a.png"
   // imgList.value = ["https://img.midjourneyapi.xyz/sd/066ed402-b5c5-44e9-8e76-fe209109db5a.png"]
+}
+
+const downloadImg = (base64: string) => {
+  const now = new Date()
+  const a = document.createElement("a")
+  a.href = base64
+  a.download = String(now.getTime())
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
 }
 // getTxt2Img()
 
