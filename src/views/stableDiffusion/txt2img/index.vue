@@ -59,10 +59,14 @@ const generaterPromptStr = () => {
     promptList.push(objectList[Math.floor(Math.random() * objectList.length)])
   }
   promptStr.value = promptList.join(",")
-  translatePrompt()
   return promptStr
 }
-generaterPromptStr()
+
+const beforeGeneraterPromptStr = () => {
+  generaterPromptStr()
+  translatePrompt()
+}
+beforeGeneraterPromptStr()
 
 const negativePromptStr = ref()
 const generaterNegativePrompt = () => {
@@ -145,8 +149,6 @@ const getTxt2Img = async () => {
   } finally {
     loading.value = false
   }
-  // imgSrc.value = "https://img.midjourneyapi.xyz/sd/066ed402-b5c5-44e9-8e76-fe209109db5a.png"
-  // imgList.value = ["https://img.midjourneyapi.xyz/sd/066ed402-b5c5-44e9-8e76-fe209109db5a.png"]
 }
 
 const downloadImg = (base64: string) => {
@@ -158,25 +160,15 @@ const downloadImg = (base64: string) => {
   a.click()
   a.remove()
 }
-// getTxt2Img()
 
-// const downloadImg = async() => {
-//   try {
-//     const response = await fetch(imgSrc.value);
-//     const blob = await response.blob();
-//     const url = window.URL.createObjectURL(blob);
-
-//     const a = document.createElement('a');
-//     a.href = url;
-//     a.download = 'image.png';
-//     document.body.appendChild(a);
-//     a.click();
-//     window.URL.revokeObjectURL(url);
-//     document.body.removeChild(a);
-//   } catch (error) {
-//     console.error('Error downloading image:', error);
-//   }
-// }
+const batch_number = ref(10)
+const beforeBatchGetTxt2Img = async () => {
+  for (let i = 0; i < batch_number.value; i++) {
+    generaterPromptStr()
+    txt2ImgParams.steps = Math.floor(Math.random() * (50 - 20 + 1)) + 20
+    await getTxt2Img()
+  }
+}
 </script>
 
 <template>
@@ -187,7 +179,8 @@ const downloadImg = (base64: string) => {
         <el-option label="本地SD-API" value="2" />
       </el-select>
       <el-button type="primary" @click="getTxt2Img">点击开始文生图</el-button>
-      <el-button type="primary" @click="generaterPromptStr">生成正向提示词</el-button>
+      <el-button type="primary" @click="beforeGeneraterPromptStr">生成正向提示词</el-button>
+      <el-button type="primary" @click="beforeBatchGetTxt2Img">批量生成</el-button>
       <!-- <el-button type="primary" @click="loginSD">测试登入SD</el-button> -->
     </div>
     <div class="flex-row">
@@ -205,16 +198,16 @@ const downloadImg = (base64: string) => {
         </div>
         <div v-if="remoteType == '2'" class="mg-20">
           <el-form label-width="140px" label-position="left">
+            <el-form-item label="生产批次">
+              <el-input-number v-model="batch_number" :min="1" :max="100" />
+            </el-form-item>
             <el-form-item label="采样器">
               <el-select v-model="txt2ImgParams.sampler_index" style="width: 220px" placeholder="请选择采样器">
                 <el-option v-for="item in samplerOpts" :key="item.value" :label="item.label" :value="item.value" />
               </el-select>
             </el-form-item>
             <el-form-item label="数量/批次">
-              <div class="flex-row">
-                <div style="margin-right: 40px">{{ txt2ImgParams.batch_size }}</div>
-                <el-slider v-model="txt2ImgParams.batch_size" :min="1" :max="4" style="width: 220px" />
-              </div>
+              <el-input-number v-model="txt2ImgParams.batch_size" :min="1" :max="4" />
             </el-form-item>
             <el-form-item label="步长">
               <div class="flex-row">
