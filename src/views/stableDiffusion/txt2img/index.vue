@@ -9,6 +9,11 @@ import axios from "axios"
 import { ElMessage } from "element-plus"
 import { setAccessToken } from "@/utils/cache/cookies"
 
+const samplerOpts: any = reactive([
+  { label: "Euler", value: "Euler" },
+  { label: "DPM++ 2M Karras", value: "DPM++ 2M Karras" }
+])
+
 // 百度翻译
 const promptStrZh = ref()
 const translatePrompt = () => {
@@ -148,12 +153,10 @@ const getTxt2Img = async () => {
       }
       console.log("goapi.ai", res)
     } else if (remoteType.value == "2") {
-      // const res2 = await getTxt2ImgDataApi(txt2ImgParams)
-      // console.log(res2)
-      const res2: any = await axios.post("http://127.0.0.1:7860/sdapi/v1/txt2img", txt2ImgParams)
+      const res2: any = await localSdInstance.post("sdapi/v1/txt2img", txt2ImgParams)
       if (res2.status == 200) {
-        imgList.value = res2.data.output
-        imgSrc.value = res2.data.output[0]
+        imgList.value = res2.data.images
+        imgSrc.value = res2.data.images[0]
       } else {
         ElMessage.error(res2.statusText)
       }
@@ -197,15 +200,30 @@ const getTxt2Img = async () => {
       <!-- <el-button type="primary" @click="loginSD">测试登入SD</el-button> -->
     </div>
     <div class="flex-row">
-      <div style="width: 500px; margin-right: 40px">
+      <div style="width: 50%; margin-right: 40px">
         <div class="mg-20">配置表单：</div>
-        <div class="mg-20">
+        <div v-if="remoteType == '1'" class="mg-20">
           <el-form>
             <el-form-item label="x-api-key">
               <el-input v-model="xApiKey" />
             </el-form-item>
             <el-form-item label="steps（步长）">
               <el-input v-model="txt2ImgRemoteParams.steps" />
+            </el-form-item>
+          </el-form>
+        </div>
+        <div v-if="remoteType == '2'" class="mg-20">
+          <el-form label-width="140px" label-position="left">
+            <el-form-item label="采样器">
+              <el-select v-model="txt2ImgParams.sampler_index" placeholder="请选择采样器">
+                <el-option v-for="item in samplerOpts" :key="item.value" :label="item.label" :value="item.value" />
+              </el-select>
+            </el-form-item>
+            <el-form-item label="数量/批次">
+              <el-slider v-model="txt2ImgParams.batch_size" :min="1" :max="4" />
+            </el-form-item>
+            <el-form-item label="步长">
+              <el-slider v-model="txt2ImgParams.steps" :min="20" :max="50" />
             </el-form-item>
           </el-form>
         </div>
