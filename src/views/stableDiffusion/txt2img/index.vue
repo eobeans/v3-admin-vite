@@ -7,7 +7,7 @@ import promptObj from "./object.json"
 import CryptoJS from "crypto-js"
 import axios from "axios"
 import { ElMessage } from "element-plus"
-import { getAccessToken } from "@/utils/cache/cookies"
+// import { getAccessToken } from "@/utils/cache/cookies"
 import { useStableDiffusionStore } from "@/store/modules/stable-diffusion"
 
 const samplerOpts: any = reactive([
@@ -88,9 +88,7 @@ const localSdInstance = axios.create({
     password: stableDiffusionStore.password
   },
   headers: {
-    Authorization: getAccessToken(),
-    Connection: "keep-alive",
-    "Access-Control-Allow-Origin": "http://localhost:3333",
+    "Access-Control-Allow-Origin": "*", // "http://localhost:3333",
     "Access-Control-Allow-Methods": "GET, POST",
     "Access-Control-Allow-Headers": "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range"
   }
@@ -175,6 +173,12 @@ const beforeBatchGetTxt2Img = async () => {
     await getTxt2Img()
   }
 }
+
+// 页面控制
+const modeEnv = import.meta.env.VITE_NODE_ENV == "production" ? ref("2") : ref("1")
+if (modeEnv.value == "2") {
+  batch_number.value = 1
+}
 </script>
 
 <template>
@@ -186,7 +190,7 @@ const beforeBatchGetTxt2Img = async () => {
       </el-select>
       <el-button type="primary" @click="getTxt2Img">点击开始文生图</el-button>
       <el-button type="primary" @click="beforeGeneraterPromptStr">生成正向提示词</el-button>
-      <el-button type="primary" @click="beforeBatchGetTxt2Img">批量生成</el-button>
+      <el-button v-if="modeEnv == '1'" type="primary" @click="beforeBatchGetTxt2Img">批量生成</el-button>
       <!-- <el-button type="primary" @click="loginSD">测试登入SD</el-button> -->
     </div>
     <div class="flex-row">
@@ -204,7 +208,7 @@ const beforeBatchGetTxt2Img = async () => {
         </div>
         <div v-if="remoteType == '2'" class="mg-20">
           <el-form label-width="140px" label-position="left">
-            <el-form-item label="生产批次">
+            <el-form-item v-if="modeEnv == '1'" label="生产批次">
               <el-input-number v-model="batch_number" :min="1" :max="100" />
             </el-form-item>
             <el-form-item label="采样器">
