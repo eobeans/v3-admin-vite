@@ -1,3 +1,4 @@
+import { ref } from "vue"
 import store from "@/store"
 import { defineStore } from "pinia"
 import { getAccessToken, removeAccessToken, setAccessToken } from "@/utils/cache/cookies"
@@ -16,11 +17,15 @@ const localSdInstance = axios.create({
 })
 
 export const useStableDiffusionStore = defineStore("stable-diffusion", () => {
+  const username = ref<string>("")
+  const password = ref<string>("")
   /** 登录 */
-  const login = async () => {
+  const login = async (loginData: any) => {
+    username.value = loginData.username
+    password.value = loginData.password
     const formData = new FormData()
-    formData.append("username", "eobeans")
-    formData.append("password", "eobeans@1996")
+    formData.append("username", username.value)
+    formData.append("password", password.value)
     localSdInstance
       .post("login", formData)
       .then((res: any) => {
@@ -36,15 +41,19 @@ export const useStableDiffusionStore = defineStore("stable-diffusion", () => {
 
   /** 登出 */
   const logout = () => {
+    username.value = ""
+    password.value = ""
     removeAccessToken()
   }
 
   /** 重置 Token */
   const resetToken = () => {
+    username.value = ""
+    password.value = ""
     removeAccessToken()
   }
 
-  return { login, logout, resetToken }
+  return { username, password, login, logout, resetToken }
 })
 
 /** 在 setup 外使用 */

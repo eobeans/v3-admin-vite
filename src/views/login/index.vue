@@ -22,9 +22,9 @@ const loading = ref(false)
 /** 验证码图片 URL */
 const codeUrl = ref("")
 /** 登录表单数据 */
-const loginFormData: LoginRequestData = reactive({
-  username: "admin",
-  password: "12345678",
+const loginFormData: any = reactive({
+  username: "eobeans",
+  password: "",
   code: ""
 })
 /** 登录表单校验规则 */
@@ -41,21 +41,16 @@ const handleLogin = () => {
   loginFormRef.value?.validate((valid: boolean, fields) => {
     if (valid) {
       loading.value = true
+      const fakeLoginFormData: LoginRequestData = {
+        username: "admin",
+        password: "12345678",
+        code: ""
+      }
       useUserStore()
-        .login(loginFormData)
+        .login(fakeLoginFormData)
         .then(() => {
-          useStableDiffusionStore()
-            .login()
-            .then(() => {
-              router.push({ path: "/" })
-            })
-            .catch(() => {
-              createCode()
-              loginFormData.password = ""
-            })
-            .finally(() => {
-              loading.value = false
-            })
+          router.push({ path: "/" })
+          useStableDiffusionStore().login(loginFormData)
         })
         .catch(() => {
           createCode()

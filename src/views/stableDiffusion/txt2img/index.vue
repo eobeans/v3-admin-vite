@@ -8,6 +8,7 @@ import CryptoJS from "crypto-js"
 import axios from "axios"
 import { ElMessage } from "element-plus"
 import { getAccessToken } from "@/utils/cache/cookies"
+import { useStableDiffusionStore } from "@/store/modules/stable-diffusion"
 
 const samplerOpts: any = reactive([
   { label: "Euler", value: "Euler" },
@@ -78,9 +79,14 @@ const generaterNegativePrompt = () => {
 generaterNegativePrompt()
 
 // SD接口服务
+const stableDiffusionStore = useStableDiffusionStore()
 const localSdInstance = axios.create({
   baseURL: "/localSd",
   timeout: 100000,
+  auth: {
+    username: stableDiffusionStore.username,
+    password: stableDiffusionStore.password
+  },
   headers: {
     Authorization: getAccessToken(),
     Connection: "keep-alive",
@@ -142,10 +148,10 @@ const getTxt2Img = async () => {
           return base64
         })
         imgSrc.value = `data:image/jpeg;base64,${res2.data.images[0]}`
-      } else {
-        ElMessage.error(res2.statusText)
       }
     }
+  } catch (err: any) {
+    ElMessage.error(err)
   } finally {
     loading.value = false
   }

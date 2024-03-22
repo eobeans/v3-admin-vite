@@ -1,5 +1,6 @@
 import axios, { type AxiosInstance, type AxiosRequestConfig } from "axios"
 import { useUserStoreHook } from "@/store/modules/user"
+import { useStableDiffusionStoreHook } from "@/store/modules/stable-diffusion"
 import { ElMessage } from "element-plus"
 import { get, merge } from "lodash-es"
 import { getToken, getXApiKey } from "./cache/cookies"
@@ -7,6 +8,7 @@ import { getToken, getXApiKey } from "./cache/cookies"
 /** 退出登录并强制刷新页面（会重定向到登录页） */
 function logout() {
   useUserStoreHook().logout()
+  useStableDiffusionStoreHook().logout()
   location.reload()
 }
 

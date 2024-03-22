@@ -4,6 +4,7 @@ import { storeToRefs } from "pinia"
 import { useAppStore } from "@/store/modules/app"
 import { useSettingsStore } from "@/store/modules/settings"
 import { useUserStore } from "@/store/modules/user"
+import { useStableDiffusionStore } from "@/store/modules/stable-diffusion"
 import { UserFilled } from "@element-plus/icons-vue"
 import Hamburger from "../Hamburger/index.vue"
 import Breadcrumb from "../Breadcrumb/index.vue"
@@ -20,6 +21,7 @@ const { isTop } = useLayoutMode()
 const router = useRouter()
 const appStore = useAppStore()
 const userStore = useUserStore()
+const stablediffusionStore = useStableDiffusionStore()
 const settingsStore = useSettingsStore()
 const { showNotify, showThemeSwitch, showScreenfull, showSearchMenu } = storeToRefs(settingsStore)
 
@@ -31,6 +33,7 @@ const toggleSidebar = () => {
 /** 登出 */
 const logout = () => {
   userStore.logout()
+  stablediffusionStore.logout()
   router.push("/login")
 }
 </script>
