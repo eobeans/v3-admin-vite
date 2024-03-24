@@ -5,6 +5,7 @@ import { type SidebarOpened, type SidebarClosed } from "@/constants/app-key"
 import { type ThemeName } from "@/hooks/useTheme"
 import { type TagView } from "@/store/modules/tags-view"
 import { type LayoutSettings } from "@/config/layouts"
+import { type SdLoginRequestData } from "@/api/stable-diffusion/types/txt2img"
 
 //#region 系统布局配置
 export const getConfigLayout = () => {
@@ -58,3 +59,16 @@ export const setCachedViews = (views: string[]) => {
   localStorage.setItem(CacheKey.CACHED_VIEWS, JSON.stringify(views))
 }
 //#endregion
+
+//#sdauth stable-diffusion登入
+export const getSDAuth = () => {
+  const json = localStorage.getItem(CacheKey.SD_AUTH)
+  return JSON.parse(json ?? "{}") as SdLoginRequestData
+}
+export const setSDAuth = (loginData: SdLoginRequestData) => {
+  localStorage.setItem(CacheKey.SD_AUTH, JSON.stringify(loginData))
+}
+export const removeSDAuth = () => {
+  localStorage.removeItem(CacheKey.SD_AUTH)
+}
+//#endsdauth

@@ -7,8 +7,7 @@ import promptObj from "./object.json"
 import CryptoJS from "crypto-js"
 import axios from "axios"
 import { ElMessage } from "element-plus"
-// import { getAccessToken } from "@/utils/cache/cookies"
-import { useStableDiffusionStore } from "@/store/modules/stable-diffusion"
+import { getSDAuth } from "@/utils/cache/local-storage"
 
 const samplerOpts: any = reactive([
   { label: "Euler", value: "Euler" },
@@ -79,13 +78,13 @@ const generaterNegativePrompt = () => {
 generaterNegativePrompt()
 
 // SD接口服务
-const stableDiffusionStore = useStableDiffusionStore()
+const sdAuth = getSDAuth()
 const localSdInstance = axios.create({
   baseURL: "/localSd",
   timeout: 100000,
   auth: {
-    username: stableDiffusionStore.username,
-    password: stableDiffusionStore.password
+    username: sdAuth.username,
+    password: sdAuth.password
   },
   headers: {
     "Access-Control-Allow-Origin": "*", // "http://localhost:3333",

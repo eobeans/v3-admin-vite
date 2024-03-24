@@ -22,13 +22,3 @@ export const setXApiKey = (xApiKey: string) => {
 export const removeXApiKey = () => {
   Cookies.remove(CacheKey.XAPIKEY)
 }
-
-export const getAccessToken = () => {
-  return Cookies.get(CacheKey.ACCESSTOKEN)
-}
-export const setAccessToken = (accessToken: string) => {
-  Cookies.set(CacheKey.ACCESSTOKEN, accessToken)
-}
-export const removeAccessToken = () => {
-  Cookies.remove(CacheKey.ACCESSTOKEN)
-}

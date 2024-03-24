@@ -10,6 +10,7 @@ import { type LoginRequestData } from "@/api/login/types/login"
 import ThemeSwitch from "@/components/ThemeSwitch/index.vue"
 import Owl from "./components/Owl.vue"
 import { useFocus } from "./hooks/useFocus"
+import { type SdLoginRequestData } from "@/api/stable-diffusion/types/txt2img"
 
 const router = useRouter()
 const { isFocus, handleBlur, handleFocus } = useFocus()
@@ -22,7 +23,7 @@ const loading = ref(false)
 /** 验证码图片 URL */
 const codeUrl = ref("")
 /** 登录表单数据 */
-const loginFormData: any = reactive({
+const loginFormData: SdLoginRequestData = reactive({
   username: "eobeans",
   password: "",
   code: ""
