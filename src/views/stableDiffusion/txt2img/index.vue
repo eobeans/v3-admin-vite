@@ -8,6 +8,9 @@ import CryptoJS from "crypto-js"
 import axios from "axios"
 import { ElMessage } from "element-plus"
 import { getSDAuth } from "@/utils/cache/local-storage"
+import { useDevice } from "@/hooks/useDevice"
+
+const { isMobile } = useDevice()
 
 const samplerOpts: any = reactive([
   { label: "Euler", value: "Euler" },
@@ -182,18 +185,20 @@ if (modeEnv.value == "2") {
 
 <template>
   <div v-loading="loading" class="app-container">
-    <div>
-      <el-select v-model="remoteType" style="width: 180px; margin-right: 20px">
+    <div :class="isMobile ? 'flex-column justify-center' : 'flex-row'">
+      <el-select v-model="remoteType" class="mg-20" style="width: 180px; margin-right: 20px">
         <el-option label="远程API" value="1" />
         <el-option label="本地SD-API" value="2" />
       </el-select>
-      <el-button type="primary" @click="getTxt2Img">点击开始文生图</el-button>
-      <el-button type="primary" @click="beforeGeneraterPromptStr">生成正向提示词</el-button>
-      <el-button v-if="modeEnv == '1'" type="primary" @click="beforeBatchGetTxt2Img">批量生成</el-button>
+      <div class="mg-20"><el-button type="primary" @click="getTxt2Img">点击开始文生图</el-button></div>
+      <div class="mg-20"><el-button type="primary" @click="beforeGeneraterPromptStr">生成正向提示词</el-button></div>
+      <div v-if="modeEnv == '1'" class="mg-20">
+        <el-button type="primary" @click="beforeBatchGetTxt2Img">批量生成</el-button>
+      </div>
       <!-- <el-button type="primary" @click="loginSD">测试登入SD</el-button> -->
     </div>
-    <div class="flex-row">
-      <div style="width: 50%; margin-right: 40px">
+    <div :class="isMobile ? 'flex-column' : 'flex-row'">
+      <div :style="isMobile ? 'width: 100%;' : 'width: 50%; margin-right: 40px;'">
         <div class="mg-20">配置表单：</div>
         <div v-if="remoteType == '1'" class="mg-20">
           <el-form>
@@ -219,10 +224,7 @@ if (modeEnv.value == "2") {
               <el-input-number v-model="txt2ImgParams.batch_size" :min="1" :max="4" />
             </el-form-item>
             <el-form-item label="步长">
-              <div class="flex-row">
-                <div style="margin-right: 40px">{{ txt2ImgParams.steps }}</div>
-                <el-slider v-model="txt2ImgParams.steps" :min="20" :max="50" style="width: 220px" />
-              </div>
+              <el-input-number v-model="txt2ImgParams.steps" :min="20" :max="50" />
             </el-form-item>
           </el-form>
         </div>
@@ -245,8 +247,8 @@ if (modeEnv.value == "2") {
         </div>
       </div>
       <div>
-        <div>
-          <el-image style="width: 512px; height: 768px" :src="imgSrc" fit="fill" :preview-src-list="imgList" />
+        <div class="flex-column justify-center" style="width: 100%">
+          <el-image style="width: 100%; max-width: 512px" :src="imgSrc" fit="scale-down" :preview-src-list="imgList" />
         </div>
       </div>
     </div>
@@ -266,5 +268,9 @@ if (modeEnv.value == "2") {
 .flex-column {
   display: flex;
   flex-direction: column;
+}
+
+.justify-center {
+  justify-content: center;
 }
 </style>
