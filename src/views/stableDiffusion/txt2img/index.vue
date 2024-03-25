@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { ref, reactive } from "vue"
 // import { getTxt2ImgDataApi } from "@/api/stable-diffusion"
-import { type Txt2ImgRequestData } from "@/api/stable-diffusion/types/txt2img"
+import { type Txt2ImgRequestData, type SDModelList } from "@/api/stable-diffusion/types/txt2img"
 import { setXApiKey } from "@/utils/cache/cookies"
 import promptObj from "./object.json"
 import CryptoJS from "crypto-js"
@@ -73,8 +73,7 @@ beforeGeneraterPromptStr()
 
 const negativePromptStr = ref()
 const generaterNegativePrompt = () => {
-  const negativePrompt =
-    "nsfw, bad anatomy, cropped, blurred, mutated, error, lowres, blurry, low quality, username, signature, watermark, text"
+  const negativePrompt = "nsfw"
   negativePromptStr.value = negativePrompt
   return negativePrompt
 }
@@ -176,6 +175,33 @@ const beforeBatchGetTxt2Img = async () => {
   }
 }
 
+// 获取模型列表
+const checkpointModel = ref("")
+const getSDOptions = async () => {
+  const res: any = await localSdInstance.get("sdapi/v1/options")
+  checkpointModel.value = res.data.sd_model_checkpoint
+}
+getSDOptions()
+const modelOpts = ref<SDModelList[]>([])
+const getSDModelOpts = async () => {
+  const res = await localSdInstance.get("sdapi/v1/sd-models")
+  modelOpts.value = res.data
+}
+getSDModelOpts()
+
+const modelChange = async (val: string) => {
+  try {
+    loading.value = true
+    const params = { sd_model_checkpoint: val }
+    const res = await localSdInstance.post("sdapi/v1/options", params)
+    if (res.status == 200) {
+      ElMessage.success("操作成功")
+    }
+  } finally {
+    loading.value = false
+  }
+}
+
 // 页面控制
 const modeEnv = import.meta.env.VITE_NODE_ENV == "production" ? ref("2") : ref("1")
 if (modeEnv.value == "2") {
@@ -212,6 +238,11 @@ if (modeEnv.value == "2") {
         </div>
         <div v-if="remoteType == '2'" class="mg-20">
           <el-form label-width="140px" label-position="left">
+            <el-form-item label="模型">
+              <el-select v-model="checkpointModel" @change="modelChange" placeholder="请选择模型">
+                <el-option v-for="item in modelOpts" :key="item.title" :label="item.title" :value="item.title" />
+              </el-select>
+            </el-form-item>
             <el-form-item v-if="modeEnv == '1'" label="生产批次">
               <el-input-number v-model="batch_number" :min="1" :max="100" />
             </el-form-item>
