@@ -42,4 +42,9 @@ export interface SDModelList {
   config?: string
 }
 
+export interface promptCombindOpts {
+  label: string
+  value: string
+}
+
 export type Txt2ImgResponseData = ApiResponseData<string>

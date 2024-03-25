@@ -1,14 +1,13 @@
 <script lang="ts" setup>
 import { ref, reactive } from "vue"
-// import { getTxt2ImgDataApi } from "@/api/stable-diffusion"
 import { type Txt2ImgRequestData, type SDModelList } from "@/api/stable-diffusion/types/txt2img"
 import { setXApiKey } from "@/utils/cache/cookies"
-import promptObj from "./object.json"
-import CryptoJS from "crypto-js"
 import axios from "axios"
 import { ElMessage } from "element-plus"
 import { getSDAuth } from "@/utils/cache/local-storage"
 import { useDevice } from "@/hooks/useDevice"
+import { useTranslate } from "./hooks/useTranslate"
+import { usePrompt } from "./hooks/usePrompt"
 
 const { isMobile } = useDevice()
 
@@ -18,66 +17,26 @@ const samplerOpts: any = reactive([
 ])
 
 // 百度翻译
-const promptStrZh = ref()
-const translatePrompt = () => {
-  const appid = "20240319001998640"
-  const salt = "1024256"
-  const key = "dr2tzlKTZ0nJVKx94irK"
-  const str1 = appid + promptStr.value + salt + key
-  const sign = CryptoJS.MD5(str1).toString()
-  axios
-    .get("baidu/api/trans/vip/translate", {
-      params: {
-        q: promptStr.value,
-        from: "en",
-        to: "zh",
-        appid: appid,
-        salt: salt,
-        sign: sign
-      }
-    })
-    .then(function (res: any) {
-      console.log(res)
-      promptStrZh.value = res.data.trans_result[0].dst
-    })
-    .catch(function (error) {
-      console.log(error)
-    })
+const { promptStrZh, translatePrompt } = useTranslate()
+
+// 提示词
+const { promptStr, promptCombind, promptCombindOpts, generaterPromptStr, changePromptCombind } = usePrompt()
+
+// 更改提示词组合方式
+const beforeChangePromptCombind = (val: string) => {
+  changePromptCombind(val)
+  translatePrompt(promptStr.value)
 }
 
-const promptStr = ref()
-const generaterPromptStr = () => {
-  const styleList = promptObj.style
-  const qualityList = promptObj.quality
-  const adjectiveList = promptObj.adjective
-  const objectList = promptObj.object
-  const cameraList = promptObj.camera
-  const promptList = [
-    styleList[Math.floor(Math.random() * styleList.length)],
-    qualityList[Math.floor(Math.random() * qualityList.length)],
-    adjectiveList[Math.floor(Math.random() * adjectiveList.length)],
-    cameraList[Math.floor(Math.random() * cameraList.length)]
-  ]
-  for (let i = 0; i < 6; i++) {
-    promptList.push(objectList[Math.floor(Math.random() * objectList.length)])
-  }
-  promptStr.value = promptList.join(",")
-  return promptStr
-}
-
+// 点击生成图片
 const beforeGeneraterPromptStr = () => {
   generaterPromptStr()
-  translatePrompt()
+  translatePrompt(promptStr.value)
 }
 beforeGeneraterPromptStr()
 
-const negativePromptStr = ref()
-const generaterNegativePrompt = () => {
-  const negativePrompt = "nsfw"
-  negativePromptStr.value = negativePrompt
-  return negativePrompt
-}
-generaterNegativePrompt()
+// 负面提示词
+const negativePromptStr = ref("nsfw")
 
 // SD接口服务
 const sdAuth = getSDAuth()
@@ -156,6 +115,7 @@ const getTxt2Img = async () => {
   }
 }
 
+// 图片下载
 const downloadImg = (base64: string) => {
   const now = new Date()
   const a = document.createElement("a")
@@ -166,6 +126,7 @@ const downloadImg = (base64: string) => {
   a.remove()
 }
 
+// 点击批量生成
 const batch_number = ref(10)
 const beforeBatchGetTxt2Img = async () => {
   for (let i = 0; i < batch_number.value; i++) {
@@ -203,8 +164,8 @@ const modelChange = async (val: string) => {
 }
 
 // 页面控制
-const modeEnv = import.meta.env.VITE_NODE_ENV == "production" ? ref("2") : ref("1")
-if (modeEnv.value == "2") {
+const modeEnv = import.meta.env.VITE_NODE_ENV == "production" ? "2" : "1"
+if (modeEnv == "2") {
   batch_number.value = 1
 }
 </script>
@@ -212,20 +173,19 @@ if (modeEnv.value == "2") {
 <template>
   <div v-loading="loading" class="app-container">
     <div :class="isMobile ? 'flex-column justify-center' : 'flex-row'">
-      <el-select v-model="remoteType" class="mg-20" style="width: 180px; margin-right: 20px">
+      <el-select v-model="remoteType" class="mg-10" style="width: 180px; margin-right: 10px">
         <el-option label="远程API" value="1" />
         <el-option label="本地SD-API" value="2" />
       </el-select>
-      <div class="mg-20"><el-button type="primary" @click="getTxt2Img">点击开始文生图</el-button></div>
-      <div class="mg-20"><el-button type="primary" @click="beforeGeneraterPromptStr">生成正向提示词</el-button></div>
-      <div v-if="modeEnv == '1'" class="mg-20">
+      <div class="mg-10"><el-button type="primary" @click="getTxt2Img">点击开始文生图</el-button></div>
+      <div class="mg-10"><el-button type="primary" @click="beforeGeneraterPromptStr">生成正向提示词</el-button></div>
+      <div class="mg-10">
         <el-button type="primary" @click="beforeBatchGetTxt2Img">批量生成</el-button>
       </div>
       <!-- <el-button type="primary" @click="loginSD">测试登入SD</el-button> -->
     </div>
     <div :class="isMobile ? 'flex-column' : 'flex-row'">
       <div :style="isMobile ? 'width: 100%;' : 'width: 50%; margin-right: 40px;'">
-        <div class="mg-20">配置表单：</div>
         <div v-if="remoteType == '1'" class="mg-20">
           <el-form>
             <el-form-item label="x-api-key">
@@ -243,8 +203,8 @@ if (modeEnv.value == "2") {
                 <el-option v-for="item in modelOpts" :key="item.title" :label="item.title" :value="item.title" />
               </el-select>
             </el-form-item>
-            <el-form-item v-if="modeEnv == '1'" label="生产批次">
-              <el-input-number v-model="batch_number" :min="1" :max="100" />
+            <el-form-item label="生产批次">
+              <el-input-number v-model="batch_number" :min="1" :max="modeEnv == '2' ? 10 : 10000" />
             </el-form-item>
             <el-form-item label="采样器">
               <el-select v-model="txt2ImgParams.sampler_index" style="width: 220px" placeholder="请选择采样器">
@@ -257,19 +217,28 @@ if (modeEnv.value == "2") {
             <el-form-item label="步长">
               <el-input-number v-model="txt2ImgParams.steps" :min="20" :max="50" />
             </el-form-item>
+            <el-form-item label="提示词组合">
+              <el-select v-model="promptCombind" @change="beforeChangePromptCombind" aceholder="请选择提示词组合">
+                <el-option
+                  v-for="item in promptCombindOpts"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                />
+              </el-select>
+            </el-form-item>
+            <el-form-item label="提示词">
+              <el-input type="textarea" :rows="4" v-model="promptStr" />
+            </el-form-item>
+            <el-form-item label="提示词（中文）">
+              <div>{{ promptStrZh }}</div>
+            </el-form-item>
+            <el-form-item label="反向提示词">
+              <el-input v-model="negativePromptStr" />
+            </el-form-item>
           </el-form>
         </div>
-        <div class="mg-20">提示词：</div>
-        <div class="mg-20">
-          <el-input type="textarea" :rows="4" v-model="promptStr" />
-        </div>
-        <div class="mg-20">提示词（中文翻译）：</div>
-        <div class="mg-20">{{ promptStrZh }}</div>
-        <div class="mg-20">反向提示词：</div>
-        <div class="mg-20">
-          <el-input type="textarea" :rows="2" v-model="negativePromptStr" />
-        </div>
-        <div class="mg-20">
+        <div v-if="remoteType == '1'" class="mg-20">
           图片地址：
           <!-- <el-button v-if="imgSrc" class="mg-20" type="primary" @click="downloadImg">下载图片</el-button> -->
         </div>
@@ -287,6 +256,9 @@ if (modeEnv.value == "2") {
 </template>
 
 <style lang="scss" scoped>
+.mg-10 {
+  margin: 10px;
+}
 .mg-20 {
   margin: 20px;
 }
