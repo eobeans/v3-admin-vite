@@ -6,9 +6,9 @@ export function usePrompt() {
   const promptStr = ref("")
   const promptCombind = ref("6")
   const promptCombindOpts = ref<promptCombindOpts[]>([
-    { label: "1风格、1画质、1形容、1摄像机、4物品", value: "4" },
-    { label: "1风格、1画质、1形容、1摄像机、6物品", value: "6" },
-    { label: "1风格、1画质、1形容、1摄像机、8物品", value: "8" },
+    { label: "1风格、1画质、1特效、1视角、4物品", value: "4" },
+    { label: "1风格、1画质、1特效、1视角、6物品", value: "6" },
+    { label: "1风格、1画质、1特效、1视角、8物品", value: "8" },
     { label: "全随机(物品1)", value: "1" },
     { label: "全随机(物品3)", value: "3" },
     { label: "全随机(物品5)", value: "5" }
@@ -16,7 +16,7 @@ export function usePrompt() {
 
   const styleList = promptObj.style
   const qualityList = promptObj.quality
-  const adjectiveList = promptObj.adjective
+  const effectList = promptObj.effect
   const objectList = promptObj.object
   const cameraList = promptObj.camera
 
@@ -27,7 +27,7 @@ export function usePrompt() {
       const promptList = [
         styleList[Math.floor(Math.random() * styleList.length)],
         qualityList[Math.floor(Math.random() * qualityList.length)],
-        adjectiveList[Math.floor(Math.random() * adjectiveList.length)],
+        effectList[Math.floor(Math.random() * effectList.length)],
         cameraList[Math.floor(Math.random() * cameraList.length)]
       ]
       for (let i = 0; i < Number(val); i++) {
@@ -38,7 +38,7 @@ export function usePrompt() {
       const promptList = [
         styleList[Math.floor(Math.random() * styleList.length)],
         qualityList[Math.floor(Math.random() * qualityList.length)],
-        adjectiveList[Math.floor(Math.random() * adjectiveList.length)],
+        effectList[Math.floor(Math.random() * effectList.length)],
         cameraList[Math.floor(Math.random() * cameraList.length)]
       ]
       for (let i = 0; i < Number(val); i++) {
@@ -55,7 +55,7 @@ export function usePrompt() {
       const promptList = [
         styleList[Math.floor(Math.random() * styleList.length)],
         qualityList[Math.floor(Math.random() * qualityList.length)],
-        adjectiveList[Math.floor(Math.random() * adjectiveList.length)],
+        effectList[Math.floor(Math.random() * effectList.length)],
         cameraList[Math.floor(Math.random() * cameraList.length)]
       ]
       for (let i = 0; i < Number(val); i++) {
@@ -66,7 +66,7 @@ export function usePrompt() {
       const promptList = [
         styleList[Math.floor(Math.random() * styleList.length)],
         qualityList[Math.floor(Math.random() * qualityList.length)],
-        adjectiveList[Math.floor(Math.random() * adjectiveList.length)],
+        effectList[Math.floor(Math.random() * effectList.length)],
         cameraList[Math.floor(Math.random() * cameraList.length)]
       ]
       for (let i = 0; i < Number(val); i++) {
