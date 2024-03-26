@@ -42,7 +42,8 @@ export default ({ mode }: ConfigEnv): UserConfigExport => {
           rewrite: (path) => path.replace(/^\/baidu/, "")
         },
         "/localSd": {
-          target: "http://127.0.0.1:7860",
+          // target: "http://127.0.0.1:7860",
+          target: "http://eobeans.v1.idcfengye.com",
           ws: true,
           /** 是否允许跨域 */
           changeOrigin: true,
